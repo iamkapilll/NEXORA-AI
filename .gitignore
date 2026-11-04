@@ -1,0 +1,34 @@
+.env
+.env.*
+!.env.example
+
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+
+faiss_db/
+*.faiss
+*.pkl
+
+*.pdf
+uploads/
+temp/
+tmp/
+*.tmp
+*.log
+.streamlit/secrets.toml
+
+# Local screenshots may contain private conversation and account data.
+gallery/
+
+# Streamlit and editor-generated files.
+.streamlit/
+.vscode/
