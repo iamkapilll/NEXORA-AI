@@ -25,15 +25,40 @@ Nexora AI is a Python assistant with a Streamlit chat interface and a LangGraph 
 - Use Tavily search, a safe arithmetic calculator, current weather, and stock quotes.
 - Render assistant answers as Markdown in Streamlit.
 
-## Application Screenshots
+## Application Gallery
 
-### Main chat interface
+The screenshots below are derived from the original project captures. Conversation names, PDF-derived personal information, and identifying LangSmith metadata have been redacted; the originals remain unchanged in the local `gallery/` folder.
 
-The clean landing state of the Streamlit chat UI:
-
-![Nexora AI main chat interface](assets/screenshots/nexora-home.png)
-
-The other local gallery images contain personal chat content, profile details, conversation titles, or account-level observability information. They are intentionally not included in this public-facing gallery.
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="50%">
+        <a href="assets/screenshots/nexora-sidebar.png">
+          <img src="assets/screenshots/nexora-sidebar.png" alt="Nexora AI sidebar with anonymized conversation records" width="100%">
+        </a>
+        <br><strong>Sidebar with chat records</strong><br>
+        Conversation navigation with private titles replaced by generic labels.
+      </td>
+      <td align="center" width="50%">
+        <a href="assets/screenshots/nexora-conversation.png">
+          <img src="assets/screenshots/nexora-conversation.png" alt="Nexora AI conversation interface with private messages redacted" width="100%">
+        </a>
+        <br><strong>Nexora AI conversations</strong><br>
+        Chat layout with user messages and PDF-grounded content hidden.
+      </td>
+    </tr>
+    <tr>
+      <td align="center" width="50%">
+        <a href="assets/screenshots/langsmith-trace.png">
+          <img src="assets/screenshots/langsmith-trace.png" alt="Redacted LangSmith trace showing the retrieval and chat execution path" width="100%">
+        </a>
+        <br><strong>LangSmith execution trace</strong><br>
+        Retrieval and chat steps; prompts, outputs, account details, and run metrics are omitted.
+      </td>
+      <td align="center" width="50%"></td>
+    </tr>
+  </table>
+</div>
 
 ## Technology Stack
 
