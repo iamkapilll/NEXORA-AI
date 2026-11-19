@@ -17,6 +17,10 @@ def get_stock_price(symbol: str) -> dict:
             "Set the ALPHAVANTAGE_API_KEY environment variable."
         }
 
+    symbol = symbol.strip().upper()
+    if not symbol:
+        return {"Error": "A stock symbol is required."}
+
     try:
         response = requests.get(
             "https://www.alphavantage.co/query",
@@ -27,6 +31,9 @@ def get_stock_price(symbol: str) -> dict:
             },
             timeout=10,
         )
+        response.raise_for_status()
         return response.json()
+    except requests.HTTPError:
+        return {"Error": "The stock service returned an HTTP error."}
     except requests.RequestException:
         return {"Error": "Could not connect to the stock service."}

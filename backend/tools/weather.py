@@ -119,8 +119,8 @@ def get_current_weather(location: str) -> str:
 
         return f"Weather API returned an HTTP error: {status_code}"
 
-    except requests.RequestException as error:
-        return f"Could not connect to the weather service: {error}"
+    except requests.RequestException:
+        return "Could not connect to the weather service. Please try again."
 
     except (KeyError, TypeError, ValueError) as error:
         return f"Unexpected weather API response: {error}"

@@ -10,6 +10,7 @@ from backend.rag.ingestion import get_thread_index_path
 from backend.state import build_retrieval_query, should_retrieve
 from backend.tools.calculator import calculator
 from backend.tools.stocks import get_stock_price
+from backend.tools.weather import get_current_weather
 
 
 class ConversationTests(unittest.TestCase):
@@ -80,6 +81,59 @@ class ToolTests(unittest.TestCase):
         self.assertEqual(
             result,
             {"Error": "Could not connect to the stock service."},
+        )
+
+    def test_stock_service_http_error_returns_a_clear_error(self):
+        with (
+            patch("backend.tools.stocks.os.getenv", return_value="test-key"),
+            patch("backend.tools.stocks.requests.get") as get,
+        ):
+            get.return_value.raise_for_status.side_effect = requests.HTTPError(
+                "request failed with test-key"
+            )
+            result = get_stock_price.invoke({"symbol": "TEST"})
+
+        self.assertEqual(
+            result,
+            {"Error": "The stock service returned an HTTP error."},
+        )
+
+    def test_stock_symbol_is_normalized_before_lookup(self):
+        with (
+            patch("backend.tools.stocks.os.getenv", return_value="test-key"),
+            patch("backend.tools.stocks.requests.get") as get,
+        ):
+            get.return_value.json.return_value = {"price": "123.45"}
+            result = get_stock_price.invoke({"symbol": "  aapl "})
+
+        self.assertEqual(result, {"price": "123.45"})
+        self.assertEqual(get.call_args.kwargs["params"]["symbol"], "AAPL")
+
+    def test_empty_stock_symbol_does_not_call_service(self):
+        with (
+            patch("backend.tools.stocks.os.getenv", return_value="test-key"),
+            patch("backend.tools.stocks.requests.get") as get,
+        ):
+            result = get_stock_price.invoke({"symbol": "  "})
+
+        self.assertEqual(result, {"Error": "A stock symbol is required."})
+        get.assert_not_called()
+
+    def test_weather_connection_error_does_not_expose_request_details(self):
+        with (
+            patch("backend.tools.weather.os.getenv", return_value="test-key"),
+            patch(
+                "backend.tools.weather.requests.get",
+                side_effect=requests.ConnectionError(
+                    "request failed with test-key"
+                ),
+            ),
+        ):
+            result = get_current_weather.invoke({"location": "London"})
+
+        self.assertEqual(
+            result,
+            "Could not connect to the weather service. Please try again.",
         )
 
 
