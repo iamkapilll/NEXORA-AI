@@ -161,7 +161,7 @@ Edit `.env` and add the credentials for the services you plan to use. Never comm
 | `OPENWEATHER_API_KEY` | Current weather tool |
 | `ALPHAVANTAGE_API_KEY` | Stock quote tool |
 
-The Groq and Google keys are needed for normal chat and PDF embedding operations. The tool-specific keys are needed only when using their corresponding services. `.env.example` contains blank placeholders only.
+Set `GROQ_API_KEY` for chat and `GOOGLE_API_KEY` for PDF embedding and retrieval. The tool-specific keys are needed only when using their corresponding services. The focused test suite mocks external services and runs without API keys. `.env.example` contains blank placeholders only.
 
 ## Running the Application
 
