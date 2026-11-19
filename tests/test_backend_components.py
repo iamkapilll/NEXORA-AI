@@ -18,7 +18,7 @@ class ConversationTests(unittest.TestCase):
             HumanMessage(content="Hello!"),
             HumanMessage(content="Can you tell me about LangGraph?"),
         ]
-        self.assertEqual(build_conversation_title(messages), "About Langgraph")
+        self.assertEqual(build_conversation_title(messages), "About LangGraph")
 
     def test_thread_index_paths_are_stable_and_isolated(self):
         first = get_thread_index_path("conversation-one")

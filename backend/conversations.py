@@ -79,7 +79,7 @@ def build_conversation_title(messages: list[BaseMessage]) -> str:
         title = POSSESSIVE_TOPIC_PATTERN.sub(r"\1's", title)
         words = title.split()
         title = " ".join(
-            TITLE_ACRONYMS.get(word.casefold(), word.capitalize())
+            TITLE_ACRONYMS.get(word.casefold(), word[:1].upper() + word[1:])
             for word in words
         )
         if len(title) > 55:
