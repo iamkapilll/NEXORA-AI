@@ -184,7 +184,7 @@ The chat model is bound to the existing Tavily search, calculator, weather, and 
 
 ## RAG and Document Retrieval
 
-Uploaded PDFs are loaded with PyPDF and split into chunks of 1,000 characters with 200 characters of overlap. Chunks are embedded with `gemini-embedding-001` and stored in a FAISS index. Retrieval returns up to four relevant chunks with filename and page metadata. The system prompt instructs the model to ground PDF answers in the supplied context and not follow instructions found in document text.
+Uploaded PDFs are loaded with PyPDF and split into chunks of 1,000 characters with 200 characters of overlap. Chunks are embedded with `gemini-embedding-001` and stored in a FAISS index. Retrieval returns up to four relevant chunks with filename and page metadata. The system prompt instructs the model to ground PDF answers in the supplied context and not follow instructions found in document text. The chunk size, overlap, and retrieval count are defined in `backend/rag/ingestion.py` and `backend/rag/retrieval.py`; adjusting them changes indexing and retrieval together.
 
 ## Conversation Memory and PDF Isolation
 
