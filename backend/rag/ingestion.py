@@ -6,6 +6,7 @@ import uuid
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
+from langchain_core.vectorstores import VectorStoreRetriever
 from backend.config import THREADS_DB_PATH
 from backend.conversations import get_thread_documents
 from backend.llm import embeddings
@@ -105,7 +106,7 @@ def ingest_rag_document(
             document_conn.rollback()
             raise
 
-def get_retriever(thread_id: str):
+def get_retriever(thread_id: str) -> VectorStoreRetriever | None:
     associated_documents = get_thread_documents(thread_id)
     if not associated_documents:
         return None
