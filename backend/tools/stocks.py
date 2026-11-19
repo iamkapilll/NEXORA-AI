@@ -7,8 +7,10 @@ from langchain_core.tools import tool
 @tool
 def get_stock_price(symbol: str) -> dict:
     """
-    Fetch latest stock price for a given symbol (e.g. 'AAPL', 'TSLA') 
-    using Alpha Vantage with API key in the URL.
+    Look up a stock ticker such as 'AAPL' or 'TSLA' using Alpha Vantage.
+
+    Whitespace is trimmed and the ticker is uppercased before the request.
+    Returns the provider quote or an Error/Note message if unavailable.
     """
     api_key = os.getenv("ALPHAVANTAGE_API_KEY")
     if not api_key:
