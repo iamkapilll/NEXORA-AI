@@ -4,6 +4,11 @@ import math
 import operator
 from langchain_core.tools import tool
 
+MAX_EXPRESSION_LENGTH = 256
+MAX_EXPRESSION_NODES = 64
+MAX_POWER_EXPONENT = 100
+MAX_POWER_RESULT_BITS = 4096
+
 
 @tool
 def calculator(expression: str) -> str:
@@ -33,16 +38,39 @@ def calculator(expression: str) -> str:
         "max": max,
         "sum": sum,
     }
+    allowed_math_functions = {
+        name: getattr(math, name)
+        for name in (
+            "acos", "asin", "atan", "ceil", "cos", "degrees", "exp",
+            "fabs", "floor", "log", "log10", "log2", "radians", "sin",
+            "sqrt", "tan",
+        )
+    }
+
+    if len(expression) > MAX_EXPRESSION_LENGTH:
+        return "Calculation error: Expression is too long."
 
     def evaluate(node):
-        if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
+        if (
+            isinstance(node, ast.Constant)
+            and type(node.value) in (int, float)
+            and (not isinstance(node.value, float) or math.isfinite(node.value))
+        ):
             return node.value
 
         if isinstance(node, ast.BinOp) and type(node.op) in binary_operators:
-            return binary_operators[type(node.op)](
-                evaluate(node.left),
-                evaluate(node.right)
-            )
+            left = evaluate(node.left)
+            right = evaluate(node.right)
+            if type(left) not in (int, float) or type(right) not in (int, float):
+                raise ValueError("Only numeric arithmetic is allowed.")
+            if isinstance(node.op, ast.Pow):
+                if abs(right) > MAX_POWER_EXPONENT:
+                    raise ValueError("Power exponent is too large.")
+                if left:
+                    estimated_bits = math.log2(abs(left)) * right
+                    if estimated_bits > MAX_POWER_RESULT_BITS:
+                        raise ValueError("Power result is too large.")
+            return binary_operators[type(node.op)](left, right)
 
         if isinstance(node, ast.UnaryOp) and type(node.op) in unary_operators:
             return unary_operators[type(node.op)](evaluate(node.operand))
@@ -63,11 +91,8 @@ def calculator(expression: str) -> str:
                 isinstance(node.func, ast.Attribute)
                 and isinstance(node.func.value, ast.Name)
                 and node.func.value.id == "math"
-                and not node.func.attr.startswith("_")
             ):
-                function = getattr(math, node.func.attr, None)
-                if not callable(function):
-                    function = None
+                function = allowed_math_functions.get(node.func.attr)
             else:
                 function = None
 
@@ -84,6 +109,8 @@ def calculator(expression: str) -> str:
 
     try:
         expression_tree = ast.parse(expression, mode="eval")
+        if sum(1 for _ in ast.walk(expression_tree)) > MAX_EXPRESSION_NODES:
+            raise ValueError("Expression is too complex.")
         return str(evaluate(expression_tree.body))
 
     except Exception as e:

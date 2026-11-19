@@ -66,6 +66,19 @@ class RoutingTests(unittest.TestCase):
 class ToolTests(unittest.TestCase):
     def test_calculator_supports_arithmetic_without_external_services(self):
         self.assertEqual(calculator.invoke({"expression": "2 + 3 * 4"}), "14")
+        self.assertEqual(calculator.invoke({"expression": "math.sqrt(16)"}), "4.0")
+
+    def test_calculator_rejects_unbounded_power(self):
+        result = calculator.invoke({"expression": "2 ** 101"})
+        self.assertIn("Power exponent is too large.", result)
+
+    def test_calculator_rejects_sequence_multiplication(self):
+        result = calculator.invoke({"expression": "sum([1] * 100000)"})
+        self.assertIn("Only numeric arithmetic is allowed.", result)
+
+    def test_calculator_rejects_oversized_expressions(self):
+        result = calculator.invoke({"expression": "1" * 257})
+        self.assertEqual(result, "Calculation error: Expression is too long.")
 
     def test_stock_service_failure_does_not_expose_request_details(self):
         with (
