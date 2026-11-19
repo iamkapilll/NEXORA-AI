@@ -186,8 +186,8 @@ def sync_conversation_titles() -> None:
             activity_time
         )
 
-def get_all_threads():
-    activity_by_thread = {}
+def get_all_threads() -> list[str]:
+    activity_by_thread: dict[str, str] = {}
     for ckpt in checkpoint.list(None):
         thread_id = ckpt.config['configurable']['thread_id']
         activity_by_thread.setdefault(thread_id, "")
