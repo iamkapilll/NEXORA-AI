@@ -2,13 +2,15 @@
 from contextlib import nullcontext
 from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
+from langchain_core.documents import Document
 from langchain_core.messages import AIMessage, HumanMessage
 import requests
 
 from backend.conversations import build_conversation_title
 from backend.rag.ingestion import get_thread_index_path
+from backend.rag.retrieval import rag_tool
 from backend.state import build_retrieval_query, should_retrieve
 from backend.tools.calculator import calculator
 from backend.tools.stocks import get_stock_price
@@ -173,6 +175,48 @@ class FileUploadTests(unittest.TestCase):
             "Could not process resume.pdf. Verify that the PDF is readable "
             "and the embedding service is configured, then retry."
         )
+
+
+class RetrievalPrivacyTests(unittest.TestCase):
+    def test_retrieval_logs_omit_conversation_and_document_identifiers(self):
+        thread_id = "private-thread-id"
+        document_id = "private-document-id"
+        filename = "private-resume.pdf"
+        associated_documents = [
+            {
+                "document_id": document_id,
+                "filename": filename,
+                "uploaded_at": "2026-01-01T00:00:00+00:00",
+            }
+        ]
+        retriever = Mock()
+        retriever.invoke.return_value = [
+            Document(
+                page_content="Relevant content",
+                metadata={"document_id": document_id, "page_number": 1},
+            )
+        ]
+
+        with (
+            patch(
+                "backend.rag.retrieval.get_thread_documents",
+                return_value=associated_documents,
+            ),
+            patch(
+                "backend.rag.retrieval.get_retriever",
+                return_value=retriever,
+            ),
+            self.assertLogs("backend.rag.retrieval", level="INFO") as logs,
+        ):
+            result = rag_tool.invoke(
+                {"query": "What is relevant?", "thread_id": thread_id}
+            )
+
+        log_output = "\n".join(logs.output)
+        self.assertIn(filename, result)
+        self.assertNotIn(thread_id, log_output)
+        self.assertNotIn(document_id, log_output)
+        self.assertNotIn(filename, log_output)
 
 
 if __name__ == "__main__":

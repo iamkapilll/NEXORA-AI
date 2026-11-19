@@ -1,5 +1,6 @@
 """PDF ingestion and thread-scoped FAISS index access."""
 import hashlib
+import logging
 import os
 import uuid
 from langchain_community.document_loaders import PyPDFLoader
@@ -9,6 +10,8 @@ from backend.config import THREADS_DB_PATH
 from backend.conversations import get_thread_documents
 from backend.llm import embeddings
 from backend.memory import document_conn, document_lock
+
+logger = logging.getLogger(__name__)
 
 
 def get_thread_index_path(thread_id: str) -> str:
@@ -43,11 +46,7 @@ def ingest_rag_document(
             ).fetchone()
             if existing_document:
                 document_conn.commit()
-                print(
-                    f"[RAG] Duplicate upload skipped: thread_id={thread_id}, "
-                    f"document_id={existing_document[0]}, filename={filename}",
-                    flush=True
-                )
+                logger.info("Duplicate PDF upload skipped.")
                 return existing_document[0]
 
             document_id = str(uuid.uuid4())
@@ -100,12 +99,7 @@ def ingest_rag_document(
             )
             document_conn.commit()
 
-            print(
-                f"[RAG] Indexed document: thread_id={thread_id}, "
-                f"document_id={document_id}, filename={filename}, "
-                f"chunks={len(chunks)}",
-                flush=True
-            )
+            logger.info("Indexed PDF document with %d chunks.", len(chunks))
             return document_id
         except Exception:
             document_conn.rollback()

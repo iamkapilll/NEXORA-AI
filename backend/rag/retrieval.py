@@ -1,7 +1,11 @@
 """Conversation-isolated retrieval tool for attached PDFs."""
+import logging
+
 from langchain_core.tools import tool
 from backend.conversations import get_thread_documents
 from backend.rag.ingestion import get_retriever
+
+logger = logging.getLogger(__name__)
 
 
 @tool
@@ -18,45 +22,24 @@ def rag_tool(query: str, thread_id: str) -> str:
     """
     associated_documents = get_thread_documents(thread_id)
     if not associated_documents:
-        print(
-            f"[RAG] No documents attached: thread_id={thread_id}",
-            flush=True
-        )
+        logger.info("PDF retrieval skipped because no documents are attached.")
         return "No document is attached to this conversation."
 
-    document_ids = {
-        document["document_id"] for document in associated_documents
-    }
     filenames = {
         document["document_id"]: document["filename"]
         for document in associated_documents
     }
-    print(
-        f"[RAG] Retrieving: thread_id={thread_id}, "
-        f"documents={[(document['document_id'], document['filename']) for document in associated_documents]}",
-        flush=True
-    )
+    logger.info("Searching the PDFs attached to this conversation.")
     retriever = get_retriever(thread_id)
     if retriever is None:
         return "No document is attached to this conversation."
     documents = retriever.invoke(query)
 
     if not documents:
-        print(
-            f"[RAG] No matching chunks: thread_id={thread_id}, "
-            f"document_ids={sorted(document_ids)}",
-            flush=True
-        )
+        logger.info("PDF retrieval found no matching chunks.")
         return "No relevant information was found in this conversation's PDFs."
 
-    retrieved_document_ids = {
-        document.metadata.get("document_id") for document in documents
-    }
-    print(
-        f"[RAG] Retrieved {len(documents)} chunk(s): thread_id={thread_id}, "
-        f"documents={[(document_id, filenames.get(document_id, 'Unknown filename')) for document_id in sorted(retrieved_document_ids) if document_id]}",
-        flush=True
-    )
+    logger.info("Retrieved %d PDF chunk(s).", len(documents))
     formatted_documents = []
 
     for index, document in enumerate(documents, start=1):
