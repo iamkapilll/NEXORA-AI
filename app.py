@@ -1,4 +1,3 @@
-
 """Nexora AI Streamlit application entry point."""
 import streamlit as st
 
@@ -17,10 +16,15 @@ st.title("Nexora AI — Your Intelligent Agentic Assistant")
 initialize_conversation_state()
 render_sidebar(chatbot)
 
+# Streamlit reruns this script top to bottom on every interaction. The active
+# thread ID and message history live in session state, so read them back after
+# the sidebar has had a chance to switch conversations.
 thread_id = st.session_state["thread_id"]
 render_chat_history(st.session_state["message_history"])
 submission = render_chat_input()
 
+# Files are ingested before the prompt is answered so that questions sent
+# alongside an upload can retrieve the newly indexed PDF content.
 if submission:
     if submission.files:
         process_uploaded_files(submission.files, thread_id)
