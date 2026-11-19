@@ -25,6 +25,7 @@ Nexora AI is a Python assistant with a Streamlit chat interface and a LangGraph 
 - Use Tavily search, a safe arithmetic calculator, current weather, and stock quotes.
 - Render assistant answers as Markdown in Streamlit.
 
+
 ## Application Gallery
 
 The screenshots below are derived from the original project captures. Conversation names, PDF-derived personal information, and identifying LangSmith metadata have been redacted; the originals remain unchanged in the local `gallery/` folder.
