@@ -40,8 +40,11 @@ def process_uploaded_files(uploaded_files: Sequence, thread_id: str) -> None:
                 f"({document_id[:8]}).",
                 icon="✅",
             )
-        except Exception as error:
-            st.error(f"PDF processing failed: {error}")
+        except Exception:
+            st.error(
+                f"Could not process {uploaded_pdf.name}. Verify that the PDF "
+                "is readable and the embedding service is configured, then retry."
+            )
         finally:
             if temporary_file_path and os.path.exists(temporary_file_path):
                 os.remove(temporary_file_path)

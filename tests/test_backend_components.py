@@ -1,4 +1,6 @@
 """Focused tests for API-free Nexora backend behavior."""
+from contextlib import nullcontext
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -11,6 +13,7 @@ from backend.state import build_retrieval_query, should_retrieve
 from backend.tools.calculator import calculator
 from backend.tools.stocks import get_stock_price
 from backend.tools.weather import get_current_weather
+from frontend.file_upload import process_uploaded_files
 
 
 class ConversationTests(unittest.TestCase):
@@ -147,6 +150,28 @@ class ToolTests(unittest.TestCase):
         self.assertEqual(
             result,
             "Could not connect to the weather service. Please try again.",
+        )
+
+
+class FileUploadTests(unittest.TestCase):
+    def test_processing_error_does_not_expose_exception_details(self):
+        uploaded_pdf = SimpleNamespace(
+            name="resume.pdf",
+            getvalue=lambda: b"not important to the mocked ingestion",
+        )
+        with (
+            patch(
+                "frontend.file_upload.ingest_rag_document",
+                side_effect=RuntimeError("provider request included private data"),
+            ),
+            patch("frontend.file_upload.st.spinner", return_value=nullcontext()),
+            patch("frontend.file_upload.st.error") as display_error,
+        ):
+            process_uploaded_files([uploaded_pdf], "thread-a")
+
+        display_error.assert_called_once_with(
+            "Could not process resume.pdf. Verify that the PDF is readable "
+            "and the embedding service is configured, then retry."
         )
 
 
