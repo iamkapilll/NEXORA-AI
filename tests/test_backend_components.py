@@ -154,6 +154,16 @@ class ToolTests(unittest.TestCase):
             "Could not connect to the weather service. Please try again.",
         )
 
+    def test_empty_weather_location_does_not_call_service(self):
+        with (
+            patch("backend.tools.weather.os.getenv", return_value="test-key"),
+            patch("backend.tools.weather.requests.get") as get,
+        ):
+            result = get_current_weather.invoke({"location": "  "})
+
+        self.assertEqual(result, "A location is required.")
+        get.assert_not_called()
+
 
 class FileUploadTests(unittest.TestCase):
     def test_processing_error_does_not_expose_exception_details(self):

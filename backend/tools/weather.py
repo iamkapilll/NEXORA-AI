@@ -18,6 +18,10 @@ def get_current_weather(location: str) -> str:
         A formatted current weather report.
     """
 
+    location = location.strip()
+    if not location:
+        return "A location is required."
+
     api_key = os.getenv("OPENWEATHER_API_KEY")
 
     if not api_key:
