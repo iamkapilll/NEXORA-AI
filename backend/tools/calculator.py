@@ -14,7 +14,8 @@ MAX_POWER_RESULT_BITS = 4096
 def calculator(expression: str) -> str:
     """
     Useful for simple math calculations.
-    Input should be a valid math expression.
+    Input should use arithmetic or an approved built-in or math function.
+    Expressions are limited in size and complexity.
     Example: 2 + 2, math.sqrt(16), 10 * 5
     """
 
